@@ -8,8 +8,8 @@ var svgHeight = 660;
 var margin = {
   top: 40,
   right: 40,
-  bottom: 80,
-  left: 100
+  bottom: 120,
+  left: 120
 };
 
 var width = svgWidth - margin.left - margin.right;
@@ -42,7 +42,7 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
       .range([0, width]);
 
     var yLinearScale = d3.scaleLinear()
-      .domain([30000, d3.max(healthData, d => d.income)])
+      .domain([0, d3.max(healthData, d => d.income)])
       .range([height, 0]);
 
     // Step 3: Create axis functions
@@ -63,19 +63,35 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     // ==============================
     var circlesGroup = chartGroup.selectAll("circle")
     .data(healthData)
-    .enter()
+    .enter();
+
+    circlesGroup
     .append("circle")
     .attr("cx", d => xLinearScale(d.obesity))
     .attr("cy", d => yLinearScale(d.income))
     .attr("r", "15")
     .attr("fill", "pink")
     .attr("opacity", ".75");
+    
+    //Adding State Abbreviations --- Play w/ pixels... plus/minus w/i function
+    circlesGroup
+    .append("text")
+    .text (d => d.abbr)
+    .attr("dx", d => xLinearScale(d.obesity))
+    .attr("dy", d => yLinearScale(d.income))
+    
+    //Tool Tip Activation - Per advice from tutor
+    .on("click", function(data) {
+        toolTip.show(data, this)})
+    .on("mouseout", function(data, index) {
+      toolTip.hide(data);
+    })
 
     // Step 6: Initialize tool tip
-    // ============================== // Do I need to call healthData???
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       .offset([80, -60])
+      //How do you use the formatting function when there are multiple items within it. I.e. I want to dollar format the income
       .html(function(d) {
         return (`${d.state}<br>Income: ${d.income}<br>Obesity: ${d.obesity}`);
       });
@@ -84,24 +100,14 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     // ==============================
     chartGroup.call(toolTip);
 
-    // Step 8: Create event listeners to display and hide the tooltip
-    // ==============================
-    circlesGroup.on("click", function(data) {
-      toolTip.show(data, this);
-    })
-      // onmouseout event
-      .on("mouseout", function(data, index) {
-        toolTip.hide(data);
-      });
-
     // Create axes labels // Why aren't axis labels loading? Is this due to my margins? I need how to calc margins re-explained
     chartGroup.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left + 40)
-      .attr("x", 0 - (height / 2))
+      .attr("y", 0 - 100)
+      .attr("x", 0 - height/2)
       .attr("dy", "1em")
       .attr("class", "axisText")
-      .text("Income");
+      .text("Avg Income");
 
     chartGroup.append("text")
       .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
