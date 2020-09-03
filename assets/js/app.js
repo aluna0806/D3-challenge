@@ -74,11 +74,13 @@ d3.csv("assets/data/data.csv").then(function(healthData) {
     .attr("opacity", ".75");
     
     //Adding State Abbreviations --- Play w/ pixels... plus/minus w/i function
+    // I looked up the "text-anchor" attribute but it's not moving anything. I cannot figure it out
     circlesGroup
     .append("text")
     .text (d => d.abbr)
     .attr("dx", d => xLinearScale(d.obesity))
     .attr("dy", d => yLinearScale(d.income))
+    .attr("text-anchor", "middle")
     
     //Tool Tip Activation - Per advice from tutor
     .on("click", function(data) {
